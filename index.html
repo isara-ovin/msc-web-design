@@ -1,47 +1,169 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-	<meta charset="UTF-8">
-	<title>Top 5 UK Stocks</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Top 5 UK Stocks</title>
+
+    <style>
+        /* Whole page: font, colours, centred layout */
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 18px;
+            line-height: 1.5;
+            color: #1a1a1a;
+            background-color: #f2f5f9;
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Skip link: hidden until a keyboard user presses Tab (Accessibility) */
+        .skip-link {
+            position: absolute;
+            left: -9999px;
+        }
+
+        .skip-link:focus {
+            position: static;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            border-bottom: 3px solid #0b3d91;
+            margin-bottom: 20px;
+        }
+
+        h1,
+        h2 {
+            color: #0b3d91;
+        }
+
+        /* Navigation: jump links to each stock */
+        nav {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        nav a {
+            display: inline-block;
+            padding: 6px 12px;
+            margin: 3px;
+            background-color: #0b3d91;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+
+        /* Note box */
+        .note {
+            background-color: #fff4cc;
+            border: 1px solid #c9a400;
+            padding: 10px 15px;
+        }
+
+        /* Each stock is an article styled as a card */
+        article {
+            background-color: white;
+            border: 1px solid #c8d0dc;
+            border-left: 8px solid #0b3d91;
+            border-radius: 6px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+        }
+
+        article h2 {
+            margin-top: 0;
+        }
+
+        /* Links in the cards */
+        article a {
+            color: #0b3d91;
+            font-weight: bold;
+        }
+
+        /* Hover and keyboard focus highlight */
+        a:hover,
+        a:focus {
+            background-color: #ffe08a;
+            color: #1a1a1a;
+            outline: 2px solid #0b3d91;
+        }
+
+        footer {
+            text-align: center;
+            color: #444444;
+            font-size: 16px;
+            border-top: 1px solid #c8d0dc;
+            padding-top: 10px;
+        }
+    </style>
 </head>
+
 <body>
-	<h1>Top 5 UK Stocks</h1>
-	<p>A simple look at five of the biggest companies listed on the London Stock Exchange.</p>
-	<p title="Figures are not live">Note: this is a tutorial page, so the details below are examples only and not financial advice.</p>
+    <a class="skip-link" href="#stocks">Skip to the stock list</a>
 
-	<hr>
+    <header>
+        <h1>Top 5 UK Stocks</h1>
+        <p>A simple look at five of the biggest companies listed on the London Stock Exchange.</p>
+    </header>
 
-	<h2>1. AstraZeneca (AZN)</h2>
-	<p>Sector: Pharmaceuticals</p>
-	<p>A global medicine company that makes treatments for cancer, heart disease and more.</p>
-	<a href="https://www.astrazeneca.com" target="_blank">Visit AstraZeneca</a>
+    <nav>
+        <a href="#astrazeneca">AstraZeneca</a>
+        <a href="#shell">Shell</a>
+        <a href="#hsbc">HSBC</a>
+        <a href="#unilever">Unilever</a>
+        <a href="#bp">BP</a>
+    </nav>
 
-	<hr>
+    <main id="stocks">
+        <p class="note"><strong>Note:</strong> this is a tutorial page, so the details below are <em>examples
+                only</em> and not financial advice.</p>
 
-	<h2>2. Shell (SHEL)</h2>
-	<p>Sector: Energy</p>
-	<p>One of the largest oil and gas companies in the world.</p>
-	<a href="https://www.shell.com" target="_blank">Visit Shell</a>
+        <article id="astrazeneca">
+            <h2>1. AstraZeneca (AZN)</h2>
+            <p><strong>Sector:</strong> Pharmaceuticals</p>
+            <p>A global medicine company that makes treatments for cancer, heart disease and more.</p>
+            <a href="https://www.astrazeneca.com" target="_blank" rel="noopener">Visit AstraZeneca (opens in a new
+                tab)</a>
+        </article>
 
-	<hr>
+        <article id="shell">
+            <h2>2. Shell (SHEL)</h2>
+            <p><strong>Sector:</strong> Energy</p>
+            <p>One of the largest oil and gas companies in the world.</p>
+            <a href="https://www.shell.com" target="_blank" rel="noopener">Visit Shell (opens in a new tab)</a>
+        </article>
 
-	<h2>3. HSBC (HSBA)</h2>
-	<p>Sector: Banking</p>
-	<p>A huge international bank with customers across Europe and Asia.</p>
-	<a href="https://www.hsbc.com" target="_blank">Visit HSBC</a>
+        <article id="hsbc">
+            <h2>3. HSBC (HSBA)</h2>
+            <p><strong>Sector:</strong> Banking</p>
+            <p>A huge international bank with customers across Europe and Asia.</p>
+            <a href="https://www.hsbc.com" target="_blank" rel="noopener">Visit HSBC (opens in a new tab)</a>
+        </article>
 
-	<hr>
+        <article id="unilever">
+            <h2>4. Unilever (ULVR)</h2>
+            <p><strong>Sector:</strong> Consumer Goods</p>
+            <p>The company behind everyday brands such as Dove, Hellmann's and Ben &amp; Jerry's.</p>
+            <a href="https://www.unilever.com" target="_blank" rel="noopener">Visit Unilever (opens in a new tab)</a>
+        </article>
 
-	<h2>4. Unilever (ULVR)</h2>
-	<p>Sector: Consumer Goods</p>
-	<p>The company behind everyday brands such as Dove, Hellmann's and Ben &amp; Jerry's.</p>
-	<a href="https://www.unilever.com" target="_blank">Visit Unilever</a>
+        <article id="bp">
+            <h2>5. BP (BP.)</h2>
+            <p><strong>Sector:</strong> Energy</p>
+            <p>A British energy company working in oil, gas and renewable power.</p>
+            <a href="https://www.bp.com" target="_blank" rel="noopener">Visit BP (opens in a new tab)</a>
+        </article>
+    </main>
 
-	<hr>
-
-	<h2>5. BP (BP.)</h2>
-	<p>Sector: Energy</p>
-	<p>A British energy company working in oil, gas and renewable power.</p>
-	<a href="https://www.bp.com" target="_blank">Visit BP</a>
+    <footer>
+        <p>Built for a beginner HTML and CSS tutorial.</p>
+    </footer>
 </body>
+
 </html>
