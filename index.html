@@ -94,6 +94,59 @@
             outline: 2px solid #0b3d91;
         }
 
+        /* Filter form */
+        form {
+            background-color: white;
+            border: 1px solid #c8d0dc;
+            border-radius: 6px;
+            padding: 10px 20px 15px;
+            margin-bottom: 20px;
+        }
+
+        fieldset {
+            border: none;
+            padding: 0;
+            margin: 10px 0 0;
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        /* Radio and checkbox labels sit on one line */
+        label.inline {
+            display: inline-block;
+            font-weight: normal;
+            margin-right: 15px;
+        }
+
+        input[type="text"],
+        select {
+            width: 100%;
+            box-sizing: border-box;
+            font-size: 18px;
+            padding: 8px;
+            margin-top: 4px;
+        }
+
+        button {
+            margin-top: 15px;
+            font-size: 18px;
+            padding: 8px 16px;
+            background-color: #0b3d91;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        /* Message under the form that updates as the user types */
+        #result-message {
+            font-weight: bold;
+        }
+
         footer {
             text-align: center;
             color: #444444;
@@ -120,50 +173,170 @@
         <a href="#bp">BP</a>
     </nav>
 
+    <form id="filter-form">
+        <h2>Find a stock</h2>
+
+        <!-- Text input: search by name -->
+        <label for="search">Search by company name</label>
+        <input type="text" id="search" placeholder="e.g. Shell">
+
+        <!-- Dropdown: choose a sector -->
+        <label for="sector">Sector</label>
+        <select id="sector">
+            <option value="all">All sectors</option>
+            <option value="Pharmaceuticals">Pharmaceuticals</option>
+            <option value="Energy">Energy</option>
+            <option value="Banking">Banking</option>
+            <option value="Consumer Goods">Consumer Goods</option>
+        </select>
+
+        <!-- Radio buttons: choose the order -->
+        <fieldset>
+            <legend><strong>Sort by</strong></legend>
+            <label class="inline"><input type="radio" name="sort" value="rank" checked> Rank</label>
+            <label class="inline"><input type="radio" name="sort" value="name"> Name (A to Z)</label>
+        </fieldset>
+
+        <!-- Slider: how many stocks to show -->
+        <label for="count">Show up to <span id="count-output">5</span> stocks</label>
+        <input type="range" id="count" min="1" max="5" value="5">
+
+        <!-- Checkbox: show or hide the descriptions -->
+        <label class="inline"><input type="checkbox" id="show-details" checked> Show descriptions</label>
+
+        <br>
+        <button type="reset" id="reset">Reset filters</button>
+    </form>
+
+    <!-- aria-live makes screen readers announce the updated message -->
+    <p id="result-message" aria-live="polite"></p>
+
     <main id="stocks">
         <p class="note"><strong>Note:</strong> this is a tutorial page, so the details below are <em>examples
                 only</em> and not financial advice.</p>
 
-        <article id="astrazeneca">
+        <div id="stock-list">
+        <article id="astrazeneca" data-name="AstraZeneca" data-sector="Pharmaceuticals" data-rank="1">
             <h2>1. AstraZeneca (AZN)</h2>
             <p><strong>Sector:</strong> Pharmaceuticals</p>
-            <p>A global medicine company that makes treatments for cancer, heart disease and more.</p>
+            <p class="desc">A global medicine company that makes treatments for cancer, heart disease and more.</p>
             <a href="https://www.astrazeneca.com" target="_blank" rel="noopener">Visit AstraZeneca (opens in a new
                 tab)</a>
         </article>
 
-        <article id="shell">
+        <article id="shell" data-name="Shell" data-sector="Energy" data-rank="2">
             <h2>2. Shell (SHEL)</h2>
             <p><strong>Sector:</strong> Energy</p>
-            <p>One of the largest oil and gas companies in the world.</p>
+            <p class="desc">One of the largest oil and gas companies in the world.</p>
             <a href="https://www.shell.com" target="_blank" rel="noopener">Visit Shell (opens in a new tab)</a>
         </article>
 
-        <article id="hsbc">
+        <article id="hsbc" data-name="HSBC" data-sector="Banking" data-rank="3">
             <h2>3. HSBC (HSBA)</h2>
             <p><strong>Sector:</strong> Banking</p>
-            <p>A huge international bank with customers across Europe and Asia.</p>
+            <p class="desc">A huge international bank with customers across Europe and Asia.</p>
             <a href="https://www.hsbc.com" target="_blank" rel="noopener">Visit HSBC (opens in a new tab)</a>
         </article>
 
-        <article id="unilever">
+        <article id="unilever" data-name="Unilever" data-sector="Consumer Goods" data-rank="4">
             <h2>4. Unilever (ULVR)</h2>
             <p><strong>Sector:</strong> Consumer Goods</p>
-            <p>The company behind everyday brands such as Dove, Hellmann's and Ben &amp; Jerry's.</p>
+            <p class="desc">The company behind everyday brands such as Dove, Hellmann's and Ben &amp; Jerry's.</p>
             <a href="https://www.unilever.com" target="_blank" rel="noopener">Visit Unilever (opens in a new tab)</a>
         </article>
 
-        <article id="bp">
+        <article id="bp" data-name="BP" data-sector="Energy" data-rank="5">
             <h2>5. BP (BP.)</h2>
             <p><strong>Sector:</strong> Energy</p>
-            <p>A British energy company working in oil, gas and renewable power.</p>
+            <p class="desc">A British energy company working in oil, gas and renewable power.</p>
             <a href="https://www.bp.com" target="_blank" rel="noopener">Visit BP (opens in a new tab)</a>
         </article>
+        </div>
     </main>
 
     <footer>
         <p>Built for a beginner HTML and CSS tutorial.</p>
     </footer>
+
+    <script>
+        // Grab the form elements we need
+        var searchBox = document.getElementById("search");
+        var sectorMenu = document.getElementById("sector");
+        var countSlider = document.getElementById("count");
+        var countOutput = document.getElementById("count-output");
+        var detailsBox = document.getElementById("show-details");
+        var sortRadios = document.getElementsByName("sort");
+        var form = document.getElementById("filter-form");
+        var list = document.getElementById("stock-list");
+        var message = document.getElementById("result-message");
+        var articles = Array.from(list.getElementsByTagName("article"));
+
+        // Which sort option is chosen?
+        function getSortValue() {
+            for (var i = 0; i < sortRadios.length; i++) {
+                if (sortRadios[i].checked) {
+                    return sortRadios[i].value;
+                }
+            }
+        }
+
+        // Re-draw the list based on every form control
+        function updateList() {
+            var text = searchBox.value.toLowerCase();
+            var sector = sectorMenu.value;
+            var maxCount = Number(countSlider.value);
+            countOutput.textContent = maxCount;
+
+            // 1. Sort
+            var sorted = articles.slice();
+            if (getSortValue() === "name") {
+                sorted.sort(function (a, b) {
+                    return a.dataset.name.localeCompare(b.dataset.name);
+                });
+            } else {
+                sorted.sort(function (a, b) {
+                    return a.dataset.rank - b.dataset.rank;
+                });
+            }
+
+            // 2. Filter, then show or hide each card
+            var shown = 0;
+            for (var i = 0; i < sorted.length; i++) {
+                var card = sorted[i];
+                var matchesName = card.dataset.name.toLowerCase().includes(text);
+                var matchesSector = (sector === "all" || card.dataset.sector === sector);
+                var visible = matchesName && matchesSector && shown < maxCount;
+
+                card.hidden = !visible;
+                if (visible) {
+                    shown++;
+                }
+
+                // Show or hide the description
+                card.querySelector(".desc").hidden = !detailsBox.checked;
+
+                // Moving the card re-orders the page
+                list.appendChild(card);
+            }
+
+            // 3. Tell the user what happened
+            if (shown === 0) {
+                message.textContent = "No stocks match your search. Try changing the filters.";
+            } else {
+                message.textContent = "Showing " + shown + " of " + articles.length + " stocks.";
+            }
+        }
+
+        // Run whenever the user changes something
+        form.addEventListener("input", updateList);
+        form.addEventListener("reset", function () {
+            // Wait for the form to reset, then redraw
+            setTimeout(updateList, 0);
+        });
+
+        // Run once when the page loads
+        updateList();
+    </script>
 </body>
 
 </html>
