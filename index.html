@@ -46,6 +46,19 @@
                     </div>
                 </div>
 
+                <!-- Search card: finds any stock using the API -->
+                <form id="search-form" class="card mb-4">
+                    <div class="card-header fw-bold">Search any stock</div>
+                    <div class="card-body">
+                        <label for="api-search" class="form-label">Company name or symbol</label>
+                        <div class="input-group">
+                            <input type="search" id="api-search" class="form-control" placeholder="e.g. Tesco">
+                            <button class="btn btn-primary" type="submit">Search</button>
+                        </div>
+                        <div id="search-results" class="list-group mt-3" aria-live="polite"></div>
+                    </div>
+                </form>
+
                 <!-- Filter form -->
                 <form id="filter-form" class="card">
                     <div class="card-header fw-bold">Find a stock</div>
@@ -98,6 +111,41 @@
 
             <!-- Right column: the stock cards -->
             <div class="col-md-8" id="stocks">
+
+                <!-- Stock detail card: filled in by the API (hidden until a stock is chosen) -->
+                <div id="detail" class="card mb-4 d-none" aria-live="polite">
+                    <div class="card-body">
+                        <h2 id="detail-title" class="h4 text-primary"></h2>
+                        <p class="mb-1"><span id="detail-price" class="display-6 fw-bold"></span>
+                            <span id="detail-change" class="badge ms-2"></span></p>
+                        <p id="detail-day" class="text-muted small"></p>
+                        <!-- The chart costs one extra API call, so it only loads when asked -->
+                        <button type="button" id="show-chart" class="btn btn-outline-primary btn-sm">Show price
+                            chart (uses 1 extra API call)</button>
+                        <div id="chart-area" class="d-none">
+                            <canvas id="chart" height="120" role="img"
+                                aria-label="Line chart of the closing price over the last 30 trading days"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alerts for loading and errors -->
+                <div id="api-alert" class="alert d-none" role="alert"></div>
+
+                <!-- Tabs: UK favourites (hard-coded) and Market movers (from the API) -->
+                <ul class="nav nav-tabs mb-3" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-uk" type="button"
+                            role="tab">UK favourites</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="movers-tab" data-bs-toggle="tab" data-bs-target="#tab-movers"
+                            type="button" role="tab">Market movers (US)</button>
+                    </li>
+                </ul>
+
+                <div class="tab-content">
+                <div class="tab-pane fade show active" id="tab-uk" role="tabpanel">
                 <p id="result-message" class="fw-bold" aria-live="polite"></p>
 
                 <div id="stock-list">
@@ -109,6 +157,8 @@
                                 disease and more.</p>
                             <a href="https://www.astrazeneca.com" class="btn btn-primary btn-sm" target="_blank"
                                 rel="noopener">Visit AstraZeneca (opens in a new tab)</a>
+                            <button type="button" class="btn btn-outline-primary btn-sm load-stock"
+                                data-symbol="AZN.LON">View live price</button>
                         </div>
                     </div>
 
@@ -119,6 +169,8 @@
                             <p class="card-text desc">One of the largest oil and gas companies in the world.</p>
                             <a href="https://www.shell.com" class="btn btn-primary btn-sm" target="_blank"
                                 rel="noopener">Visit Shell (opens in a new tab)</a>
+                            <button type="button" class="btn btn-outline-primary btn-sm load-stock"
+                                data-symbol="SHEL.LON">View live price</button>
                         </div>
                     </div>
 
@@ -130,6 +182,8 @@
                             </p>
                             <a href="https://www.hsbc.com" class="btn btn-primary btn-sm" target="_blank"
                                 rel="noopener">Visit HSBC (opens in a new tab)</a>
+                            <button type="button" class="btn btn-outline-primary btn-sm load-stock"
+                                data-symbol="HSBA.LON">View live price</button>
                         </div>
                     </div>
 
@@ -141,6 +195,8 @@
                                 Ben &amp; Jerry's.</p>
                             <a href="https://www.unilever.com" class="btn btn-primary btn-sm" target="_blank"
                                 rel="noopener">Visit Unilever (opens in a new tab)</a>
+                            <button type="button" class="btn btn-outline-primary btn-sm load-stock"
+                                data-symbol="ULVR.LON">View live price</button>
                         </div>
                     </div>
 
@@ -152,20 +208,33 @@
                             </p>
                             <a href="https://www.bp.com" class="btn btn-primary btn-sm" target="_blank"
                                 rel="noopener">Visit BP (opens in a new tab)</a>
+                            <button type="button" class="btn btn-outline-primary btn-sm load-stock"
+                                data-symbol="BP.LON">View live price</button>
                         </div>
                     </div>
+                </div>
+                </div>
+
+                <!-- Market movers: list built by jQuery from the API -->
+                <div class="tab-pane fade" id="tab-movers" role="tabpanel">
+                    <p class="text-muted small">Top gaining US stocks right now. The free API only covers US
+                        markets for this list.</p>
+                    <div id="movers-list" class="list-group"></div>
+                </div>
                 </div>
             </div>
         </div>
     </main>
 
     <footer class="text-center text-muted border-top py-3 mt-4">
-        Built for a beginner HTML, CSS, jQuery and Bootstrap tutorial.
+        Built for a course module on HTML, CSS, jQuery and Bootstrap tutorial.
     </footer>
 
     <!-- jQuery first, then Bootstrap's JavaScript bundle, then our own script -->
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Chart.js draws the price history chart -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
     <script>
         // Wait until the page has loaded
@@ -184,7 +253,7 @@
 
                 $("#count-output").text(maxCount);
 
-                // 1. Sort the cards
+                // Sort the cards
                 var sorted = $cards.toArray().sort(function (a, b) {
                     if (sortBy === "name") {
                         return $(a).data("name").localeCompare($(b).data("name"));
@@ -192,7 +261,7 @@
                     return $(a).data("rank") - $(b).data("rank");
                 });
 
-                // 2. Show or hide each card (d-none is a Bootstrap class)
+                // Show or hide each card (d-none is a Bootstrap class)
                 var shown = 0;
                 $.each(sorted, function (i, card) {
                     var $card = $(card);
@@ -208,7 +277,7 @@
                     $list.append($card);   // moving the card re-orders the page
                 });
 
-                // 3. Tell the user what happened
+                // Tell the user what happened
                 if (shown === 0) {
                     $("#result-message").text("No stocks match your search. Try changing the filters.");
                 } else {
@@ -250,6 +319,232 @@
                 });
 
             $("#pounds").on("input", showConversion);
+
+            // ---- API: Alpha Vantage stock data ----
+            // WARNING: This is a free API key for demonstration purposes only.
+            var API_KEY = "T6HSIBWRKNJOJ8K6";
+            var API_URL = "https://www.alphavantage.co/query";
+            var chart = null;
+
+            // Show a Bootstrap alert (type: info, warning or danger)
+            function showAlert(type, message) {
+                $("#api-alert").removeClass("d-none alert-info alert-warning alert-danger")
+                    .addClass("alert-" + type).text(message);
+            }
+
+            function hideAlert() {
+                $("#api-alert").addClass("d-none");
+            }
+
+            // Call the API. Answers are saved for this visit so repeat views do not use up the daily limit.
+            function callApi(params) {
+                params.apikey = API_KEY;
+                var url = API_URL + "?" + $.param(params);
+
+                try {
+                    var saved = sessionStorage.getItem(url);
+                    if (saved) {
+                        return $.Deferred().resolve(JSON.parse(saved)).promise();
+                    }
+                } catch (e) { /* storage not available: carry on without it */ }
+
+                return $.getJSON(url).then(function (data) {
+                    // The API replies "200 OK" even when something is wrong, so check the content
+                    if (data.Information || data.Note) {
+                        return $.Deferred().reject("limit").promise();
+                    }
+                    if (data["Error Message"]) {
+                        return $.Deferred().reject("bad").promise();
+                    }
+                    try {
+                        sessionStorage.setItem(url, JSON.stringify(data));
+                    } catch (e) { /* ignore */ }
+                    return data;
+                });
+            }
+
+            function errorText(reason) {
+                if (reason === "limit") {
+                    return "The free API limit has been reached for today. Please try again later.";
+                }
+                if (reason === "bad") {
+                    return "The API did not recognise that stock symbol.";
+                }
+                return "Sorry, the stock data could not be loaded. Check your internet connection.";
+            }
+
+            // Format a price: UK stocks (.LON) are quoted in pence, US stocks in dollars
+            function formatPrice(price, symbol) {
+                if (/\.LON$/.test(symbol)) {
+                    return price.toFixed(2) + "p";
+                }
+                return /\./.test(symbol) ? price.toFixed(2) : "$" + price.toFixed(2);
+            }
+
+            // Load the price and the history for one stock, then show them
+            function loadStock(symbol, name) {
+                showAlert("info", "Loading " + symbol + "...");
+
+                callApi({ "function": "GLOBAL_QUOTE", symbol: symbol })
+                    .then(function (quoteData) {
+                        var q = quoteData["Global Quote"];
+                        if (!q || !q["05. price"]) {
+                            return $.Deferred().reject("bad").promise();
+                        }
+                        return q;
+                    })
+                    .done(function (q) {
+                        hideAlert();
+                        showStock(symbol, name, q);
+                    })
+                    .fail(function (reason) {
+                        showAlert("danger", errorText(reason));
+                    });
+            }
+
+            var currentSymbol = null;
+
+            function showStock(symbol, name, q) {
+                currentSymbol = symbol;
+                var price = parseFloat(q["05. price"]);
+                var change = parseFloat(q["09. change"]);
+                var percent = q["10. change percent"];
+                var up = change >= 0;
+
+                $("#detail-title").text(name ? name + " (" + symbol + ")" : symbol);
+                $("#detail-price").text(formatPrice(price, symbol));
+                // An arrow and a +/- sign as well as a colour, so it works without colour vision
+                $("#detail-change").text((up ? "▲ +" : "▼ ") + change.toFixed(2) + " (" + percent + ")")
+                    .removeClass("bg-success bg-danger").addClass(up ? "bg-success" : "bg-danger");
+                $("#detail-day").text("Latest trading day: " + q["07. latest trading day"]);
+                $("#detail").removeClass("d-none");
+
+                // Reset the chart area for the new stock
+                if (chart) {
+                    chart.destroy();
+                    chart = null;
+                }
+                $("#chart-area").addClass("d-none");
+                $("#show-chart").removeClass("d-none").prop("disabled", false);
+
+                $("#detail")[0].scrollIntoView({ behavior: "smooth" });
+            }
+
+            // Chart: only fetched when the user clicks the button (saves API calls)
+            $("#show-chart").on("click", function () {
+                var symbol = currentSymbol;
+                var $button = $(this).prop("disabled", true);
+                showAlert("info", "Loading chart for " + symbol + "...");
+
+                callApi({ "function": "TIME_SERIES_DAILY", symbol: symbol })
+                    .done(function (data) {
+                        var series = data["Time Series (Daily)"];
+                        if (!series || symbol !== currentSymbol) {
+                            $button.prop("disabled", false);
+                            return;
+                        }
+                        hideAlert();
+                        $button.addClass("d-none");
+                        $("#chart-area").removeClass("d-none");
+                        drawChart(series);
+                    })
+                    .fail(function (reason) {
+                        $button.prop("disabled", false);
+                        showAlert("danger", errorText(reason));
+                    });
+            });
+
+            function drawChart(series) {
+                // The last 30 closing prices, oldest first
+                var dates = Object.keys(series).slice(0, 30).reverse();
+                var closes = $.map(dates, function (d) {
+                    return parseFloat(series[d]["4. close"]);
+                });
+
+                if (chart) {
+                    chart.destroy();
+                }
+                chart = new Chart(document.getElementById("chart"), {
+                    type: "line",
+                    data: {
+                        labels: dates,
+                        datasets: [{
+                            label: "Closing price",
+                            data: closes,
+                            borderColor: "#0d6efd",
+                            backgroundColor: "rgba(13, 110, 253, 0.1)",
+                            fill: true,
+                            tension: 0.2,
+                            pointRadius: 2
+                        }]
+                    },
+                    options: { plugins: { legend: { display: false } } }
+                });
+            }
+
+            // Any button with data-symbol loads that stock (this also works for buttons added later)
+            $(document).on("click", ".load-stock", function () {
+                loadStock($(this).data("symbol"), $(this).data("name"));
+            });
+
+            // Search: ask the API for matching companies
+            $("#search-form").on("submit", function (event) {
+                event.preventDefault();
+                var words = $.trim($("#api-search").val());
+                var $results = $("#search-results").empty();
+                if (words === "") {
+                    return;
+                }
+
+                $results.append($("<div>").addClass("text-muted").text("Searching..."));
+                callApi({ "function": "SYMBOL_SEARCH", keywords: words })
+                    .done(function (data) {
+                        $results.empty();
+                        var matches = data.bestMatches || [];
+                        if (matches.length === 0) {
+                            $results.append($("<div>").addClass("text-muted").text("No companies found."));
+                        }
+                        $.each(matches.slice(0, 6), function (i, m) {
+                            // .text() is used so API text can never run as HTML
+                            $("<button>").attr("type", "button")
+                                .addClass("list-group-item list-group-item-action load-stock")
+                                .attr("data-symbol", m["1. symbol"])
+                                .attr("data-name", m["2. name"])
+                                .text(m["2. name"] + " (" + m["1. symbol"] + ") - " + m["4. region"])
+                                .appendTo($results);
+                        });
+                    })
+                    .fail(function (reason) {
+                        $results.empty();
+                        showAlert("danger", errorText(reason));
+                    });
+            });
+
+            // Market movers: load once, the first time the tab is opened
+            var moversLoaded = false;
+            $("#movers-tab").on("shown.bs.tab", function () {
+                if (moversLoaded) {
+                    return;
+                }
+                var $list = $("#movers-list").text("Loading...");
+                callApi({ "function": "TOP_GAINERS_LOSERS" })
+                    .done(function (data) {
+                        moversLoaded = true;
+                        $list.empty();
+                        $.each((data.top_gainers || []).slice(0, 3), function (i, s) {
+                            $("<button>").attr("type", "button")
+                                .addClass("list-group-item list-group-item-action d-flex justify-content-between load-stock")
+                                .attr("data-symbol", s.ticker)
+                                .append($("<span>").text(s.ticker))
+                                .append($("<span>").text("$" + s.price + "  ▲ " + s.change_percentage))
+                                .appendTo($list);
+                        });
+                    })
+                    .fail(function (reason) {
+                        $list.empty();
+                        showAlert("danger", errorText(reason));
+                    });
+            });
         });
     </script>
 </body>
