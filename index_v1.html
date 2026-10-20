@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Top 5 UK Stocks</title>
+
+    <style>
+        /* Whole page: font, colours, centred layout */
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 18px;
+            line-height: 1.5;
+            color: #1a1a1a;
+            background-color: #f2f5f9;
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Skip link: hidden until a keyboard user presses Tab (Accessibility) */
+        .skip-link {
+            position: absolute;
+            left: -9999px;
+        }
+
+        .skip-link:focus {
+            position: static;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            border-bottom: 3px solid #0b3d91;
+            margin-bottom: 20px;
+        }
+
+        h1,
+        h2 {
+            color: #0b3d91;
+        }
+
+        /* Navigation: jump links to each stock */
+        nav {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        nav a {
+            display: inline-block;
+            padding: 6px 12px;
+            margin: 3px;
+            background-color: #0b3d91;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+
+        /* Note box */
+        .note {
+            background-color: #fff4cc;
+            border: 1px solid #c9a400;
+            padding: 10px 15px;
+        }
+
+        /* Each stock is an article styled as a card */
+        article {
+            background-color: white;
+            border: 1px solid #c8d0dc;
+            border-left: 8px solid #0b3d91;
+            border-radius: 6px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+        }
+
+        article h2 {
+            margin-top: 0;
+        }
+
+        /* Links in the cards */
+        article a {
+            color: #0b3d91;
+            font-weight: bold;
+        }
+
+        /* Hover and keyboard focus highlight */
+        a:hover,
+        a:focus {
+            background-color: #ffe08a;
+            color: #1a1a1a;
+            outline: 2px solid #0b3d91;
+        }
+
+        /* Filter form */
+        form {
+            background-color: white;
+            border: 1px solid #c8d0dc;
+            border-radius: 6px;
+            padding: 10px 20px 15px;
+            margin-bottom: 20px;
+        }
+
+        fieldset {
+            border: none;
+            padding: 0;
+            margin: 10px 0 0;
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        /* Radio and checkbox labels sit on one line */
+        label.inline {
+            display: inline-block;
+            font-weight: normal;
+            margin-right: 15px;
+        }
+
+        input[type="text"],
+        select {
+            width: 100%;
+            box-sizing: border-box;
+            font-size: 18px;
+            padding: 8px;
+            margin-top: 4px;
+        }
+
+        button {
+            margin-top: 15px;
+            font-size: 18px;
+            padding: 8px 16px;
+            background-color: #0b3d91;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        /* Exchange rate box filled in by the API */
+        .rates {
+            background-color: #e6f0ff;
+            border: 1px solid #0b3d91;
+            border-radius: 6px;
+            padding: 5px 20px 15px;
+            margin-bottom: 20px;
+        }
+
+        /* Message under the form that updates as the user types */
+        #result-message {
+            font-weight: bold;
+        }
+
+        footer {
+            text-align: center;
+            color: #444444;
+            font-size: 16px;
+            border-top: 1px solid #c8d0dc;
+            padding-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <a class="skip-link" href="#stocks">Skip to the stock list</a>
+
+    <header>
+        <h1>Top 5 UK Stocks</h1>
+        <p>A simple look at five of the biggest companies listed on the London Stock Exchange.</p>
+    </header>
+
+    <nav>
+        <a href="#astrazeneca">AstraZeneca</a>
+        <a href="#shell">Shell</a>
+        <a href="#hsbc">HSBC</a>
+        <a href="#unilever">Unilever</a>
+        <a href="#bp">BP</a>
+    </nav>
+
+    <!-- Filled in by JavaScript using the Frankfurter exchange rate API -->
+    <section class="rates" aria-live="polite">
+        <h2>Pound exchange rate</h2>
+        <p id="rate-text">Loading the latest rates...</p>
+        <label for="pounds">Convert pounds (&pound;) to dollars</label>
+        <input type="number" id="pounds" min="0" value="100">
+        <p id="converted"></p>
+    </section>
+
+    <form id="filter-form">
+        <h2>Find a stock</h2>
+
+        <!-- Text input: search by name -->
+        <label for="search">Search by company name</label>
+        <input type="text" id="search" placeholder="e.g. Shell">
+
+        <!-- Dropdown: choose a sector -->
+        <label for="sector">Sector</label>
+        <select id="sector">
+            <option value="all">All sectors</option>
+            <option value="Pharmaceuticals">Pharmaceuticals</option>
+            <option value="Energy">Energy</option>
+            <option value="Banking">Banking</option>
+            <option value="Consumer Goods">Consumer Goods</option>
+        </select>
+
+        <!-- Radio buttons: choose the order -->
+        <fieldset>
+            <legend><strong>Sort by</strong></legend>
+            <label class="inline"><input type="radio" name="sort" value="rank" checked> Rank</label>
+            <label class="inline"><input type="radio" name="sort" value="name"> Name (A to Z)</label>
+        </fieldset>
+
+        <!-- Slider: how many stocks to show -->
+        <label for="count">Show up to <span id="count-output">5</span> stocks</label>
+        <input type="range" id="count" min="1" max="5" value="5">
+
+        <!-- Checkbox: show or hide the descriptions -->
+        <label class="inline"><input type="checkbox" id="show-details" checked> Show descriptions</label>
+
+        <br>
+        <button type="reset" id="reset">Reset filters</button>
+    </form>
+
+    <!-- aria-live makes screen readers announce the updated message -->
+    <p id="result-message" aria-live="polite"></p>
+
+    <main id="stocks">
+        <p class="note"><strong>Note:</strong> this is a tutorial page, so the details below are <em>examples
+                only</em> and not financial advice.</p>
+
+        <div id="stock-list">
+        <article id="astrazeneca" data-name="AstraZeneca" data-sector="Pharmaceuticals" data-rank="1">
+            <h2>1. AstraZeneca (AZN)</h2>
+            <p><strong>Sector:</strong> Pharmaceuticals</p>
+            <p class="desc">A global medicine company that makes treatments for cancer, heart disease and more.</p>
+            <a href="https://www.astrazeneca.com" target="_blank" rel="noopener">Visit AstraZeneca (opens in a new
+                tab)</a>
+        </article>
+
+        <article id="shell" data-name="Shell" data-sector="Energy" data-rank="2">
+            <h2>2. Shell (SHEL)</h2>
+            <p><strong>Sector:</strong> Energy</p>
+            <p class="desc">One of the largest oil and gas companies in the world.</p>
+            <a href="https://www.shell.com" target="_blank" rel="noopener">Visit Shell (opens in a new tab)</a>
+        </article>
+
+        <article id="hsbc" data-name="HSBC" data-sector="Banking" data-rank="3">
+            <h2>3. HSBC (HSBA)</h2>
+            <p><strong>Sector:</strong> Banking</p>
+            <p class="desc">A huge international bank with customers across Europe and Asia.</p>
+            <a href="https://www.hsbc.com" target="_blank" rel="noopener">Visit HSBC (opens in a new tab)</a>
+        </article>
+
+        <article id="unilever" data-name="Unilever" data-sector="Consumer Goods" data-rank="4">
+            <h2>4. Unilever (ULVR)</h2>
+            <p><strong>Sector:</strong> Consumer Goods</p>
+            <p class="desc">The company behind everyday brands such as Dove, Hellmann's and Ben &amp; Jerry's.</p>
+            <a href="https://www.unilever.com" target="_blank" rel="noopener">Visit Unilever (opens in a new tab)</a>
+        </article>
+
+        <article id="bp" data-name="BP" data-sector="Energy" data-rank="5">
+            <h2>5. BP (BP.)</h2>
+            <p><strong>Sector:</strong> Energy</p>
+            <p class="desc">A British energy company working in oil, gas and renewable power.</p>
+            <a href="https://www.bp.com" target="_blank" rel="noopener">Visit BP (opens in a new tab)</a>
+        </article>
+        </div>
+    </main>
+
+    <footer>
+        <p>Built for a beginner HTML and CSS tutorial.</p>
+    </footer>
+
+    <script>
+        // Grab the form elements we need
+        var searchBox = document.getElementById("search");
+        var sectorMenu = document.getElementById("sector");
+        var countSlider = document.getElementById("count");
+        var countOutput = document.getElementById("count-output");
+        var detailsBox = document.getElementById("show-details");
+        var sortRadios = document.getElementsByName("sort");
+        var form = document.getElementById("filter-form");
+        var list = document.getElementById("stock-list");
+        var message = document.getElementById("result-message");
+        var articles = Array.from(list.getElementsByTagName("article"));
+
+        // Which sort option is chosen?
+        function getSortValue() {
+            for (var i = 0; i < sortRadios.length; i++) {
+                if (sortRadios[i].checked) {
+                    return sortRadios[i].value;
+                }
+            }
+        }
+
+        // Re-draw the list based on every form control
+        function updateList() {
+            var text = searchBox.value.toLowerCase();
+            var sector = sectorMenu.value;
+            var maxCount = Number(countSlider.value);
+            countOutput.textContent = maxCount;
+
+            // 1. Sort
+            var sorted = articles.slice();
+            if (getSortValue() === "name") {
+                sorted.sort(function (a, b) {
+                    return a.dataset.name.localeCompare(b.dataset.name);
+                });
+            } else {
+                sorted.sort(function (a, b) {
+                    return a.dataset.rank - b.dataset.rank;
+                });
+            }
+
+            // 2. Filter, then show or hide each card
+            var shown = 0;
+            for (var i = 0; i < sorted.length; i++) {
+                var card = sorted[i];
+                var matchesName = card.dataset.name.toLowerCase().includes(text);
+                var matchesSector = (sector === "all" || card.dataset.sector === sector);
+                var visible = matchesName && matchesSector && shown < maxCount;
+
+                card.hidden = !visible;
+                if (visible) {
+                    shown++;
+                }
+
+                // Show or hide the description
+                card.querySelector(".desc").hidden = !detailsBox.checked;
+
+                // Moving the card re-orders the page
+                list.appendChild(card);
+            }
+
+            // 3. Tell the user what happened
+            if (shown === 0) {
+                message.textContent = "No stocks match your search. Try changing the filters.";
+            } else {
+                message.textContent = "Showing " + shown + " of " + articles.length + " stocks.";
+            }
+        }
+
+        // Run whenever the user changes something
+        form.addEventListener("input", updateList);
+        form.addEventListener("reset", function () {
+            // Wait for the form to reset, then redraw
+            setTimeout(updateList, 0);
+        });
+
+        // Run once when the page loads
+        updateList();
+
+        // ---- API: get the latest pound exchange rates ----
+        var rateText = document.getElementById("rate-text");
+        var poundsBox = document.getElementById("pounds");
+        var converted = document.getElementById("converted");
+        var usdRate = null;
+
+        function showConversion() {
+            if (usdRate === null) {
+                return;
+            }
+            var pounds = Number(poundsBox.value);
+            converted.textContent = "£" + pounds + " is about $" + (pounds * usdRate).toFixed(2);
+        }
+
+        // fetch() asks the API for data and returns a promise
+        fetch("https://api.frankfurter.dev/v2/rates?base=GBP&quotes=USD,EUR")
+            .then(function (response) {
+                if (!response.ok) {
+                    throw new Error("Bad response");
+                }
+                return response.json();   // turn the reply into JavaScript data
+            })
+            .then(function (data) {
+                // data is a list like [{quote: "EUR", rate: 1.18}, {quote: "USD", rate: 1.33}]
+                var text = "";
+                for (var i = 0; i < data.length; i++) {
+                    text += "£1 = " + data[i].rate + " " + data[i].quote + ". ";
+                    if (data[i].quote === "USD") {
+                        usdRate = data[i].rate;
+                    }
+                }
+                rateText.textContent = text + "(Rates from " + data[0].date + ")";
+                showConversion();
+            })
+            .catch(function () {
+                // If the internet or the API fails, tell the user nicely
+                rateText.textContent = "Sorry, the exchange rates could not be loaded right now.";
+            });
+
+        poundsBox.addEventListener("input", showConversion);
+    </script>
+</body>
+
+</html>
